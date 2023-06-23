@@ -2,15 +2,14 @@ package guru.qa;
 
 import com.google.gson.Gson;
 import com.opencsv.CSVReader;
-import guru.qa.model.UserModel;
+import guru.qa.model.User.UserModel;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -19,6 +18,7 @@ import java.util.zip.ZipFile;
 public class FileParsingTest {
 	ClassLoader cl = FileParsingTest.class.getClassLoader();
 	Gson gson = new Gson();
+	ObjectMapper objectMapper = new ObjectMapper();
 
 	@Test
 	public void zipCsvTest() throws Exception {
@@ -72,7 +72,7 @@ public class FileParsingTest {
 	}
 
 	@Test
-	public void userJsonTest() throws Exception {
+	public void userJsonGsonTest() throws Exception {
 		try (InputStream stream = cl.getResourceAsStream("user.json");
 			 Reader reader = new InputStreamReader(stream)) {
 			UserModel jsonObject = gson.fromJson(reader, UserModel.class);
@@ -83,5 +83,17 @@ public class FileParsingTest {
 			Assertions.assertEquals("michael.lawson@reqres.in", jsonObject.getData().get(0).getEmail());
 			Assertions.assertEquals("Lawson", jsonObject.getData().get(0).getLastName());
 		}
+	}
+
+	@Test
+	public void userJsonJacksonTest() throws IOException {
+		File file = new File("src/test/resources/user.json");
+		UserModel jsonObject = objectMapper.readValue(file, UserModel.class);
+		Assertions.assertEquals(2, jsonObject.getPage(), "Должна быть вторая страница");
+		Assertions.assertEquals(8, jsonObject.getData().get(1).getId());
+		Assertions.assertEquals("lindsay.ferguson@reqres.in", jsonObject.getData().get(1).getEmail());
+		Assertions.assertEquals("https://reqres.in/img/faces/8-image.jpg", jsonObject.getData().get(1).getAvatar());
+
+
 	}
 }
