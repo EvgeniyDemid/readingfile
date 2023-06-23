@@ -2,6 +2,7 @@ package guru.qa;
 
 import com.google.gson.Gson;
 import com.opencsv.CSVReader;
+import guru.qa.model.UserModel;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Assertions;
@@ -16,6 +17,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class FileParsingTest {
+	ClassLoader cl = FileParsingTest.class.getClassLoader();
 	Gson gson = new Gson();
 
 	@Test
@@ -66,6 +68,20 @@ public class FileParsingTest {
 				Assertions.assertEquals("Spring", sheet.getRow(1).getCell(0).toString());
 				Assertions.assertEquals("Winter", sheet.getRow(2).getCell(0).toString());
 			}
+		}
+	}
+
+	@Test
+	public void userJsonTest() throws Exception {
+		try (InputStream stream = cl.getResourceAsStream("user.json");
+			 Reader reader = new InputStreamReader(stream)) {
+			UserModel jsonObject = gson.fromJson(reader, UserModel.class);
+
+			Assertions.assertEquals(2, jsonObject.getPage(), "Должна быть вторая страница");
+			Assertions.assertEquals(7, jsonObject.getData().get(0).getId());
+			Assertions.assertEquals("Michael", jsonObject.getData().get(0).getFirstName());
+			Assertions.assertEquals("michael.lawson@reqres.in", jsonObject.getData().get(0).getEmail());
+			Assertions.assertEquals("Lawson", jsonObject.getData().get(0).getLastName());
 		}
 	}
 }
